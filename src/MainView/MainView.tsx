@@ -31,6 +31,7 @@ const MainView = ({ visibleList, getItemById, openItem, currentID }: Props) => {
             style={{ borderRadius: "1em" }}
             color="primary"
             onClick={() => openItem(item.id)}
+            key={item.id}
           >
             <label>{item.name}</label>
             {item.content ? <Feed /> : <FolderOpen />}

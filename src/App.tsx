@@ -19,9 +19,13 @@ export type item = {
   content: string | null;
 };
 
-const initialItemState: Array<item> = [
-  { id: 0, parent_id: null, name: "Home", content: null },
-];
+const initialLocation: number = localStorage.getItem("currentLocation")
+  ? JSON.parse(localStorage.getItem("currentLocation")!)
+  : 0;
+
+const initialItemState: Array<item> = localStorage.getItem("data")
+  ? JSON.parse(localStorage.getItem("data")!)
+  : [{ id: 0, parent_id: null, name: "Home", content: null }];
 
 export interface getItemByIdFunc {
   (id: number | null): item | undefined;
@@ -30,7 +34,7 @@ export interface getItemByIdFunc {
 function App() {
   const [modal, setModal] = useState<ModalState>(ModalState.None);
   const [items, setItems] = useState<Array<item>>(initialItemState);
-  const [currentID, setCurrentID] = useState<number>(0);
+  const [currentID, setCurrentID] = useState<number>(initialLocation);
   const [visibleList, setVisibleList] = useState<Array<item>>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const fetchResults = useRef(
@@ -112,6 +116,14 @@ function App() {
   useEffect(() => {
     fetchResults.current(searchTerm, currentID, items);
   }, [searchTerm, currentID, items]);
+
+  useEffect(() => {
+    localStorage.setItem("data", JSON.stringify(items));
+  }, [items]);
+
+  useEffect(() => {
+    localStorage.setItem("currentLocation", JSON.stringify(currentID));
+  }, [currentID]);
 
   return (
     <div className="App">
