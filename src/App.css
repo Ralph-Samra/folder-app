@@ -4,9 +4,6 @@
   max-width: 1000px;
   margin: auto;
   background-color: white;
-  box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.393);
-  height: 80vh;
-  margin-top: 5vh;
 }
 
 .App-logo {
@@ -79,4 +76,9 @@
   align-items: flex-start;
   gap: 20px;
   display: flex;
+  margin: 20px 0;
+}
+
+.MuiLink-root {
+  cursor: pointer !important;
 }

@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Button, TextField } from "@mui/material";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Breadcrumbs, Button, Link, TextField } from "@mui/material";
 import "./App.css";
 import AppModal from "./AppModal/AppModal";
 import MainView from "./MainView/MainView";
 import { Box } from "@mui/system";
+import { throttle } from "lodash";
 
 enum ModalState {
   Folder,
@@ -23,7 +24,7 @@ const initialItemState: Array<item> = [
 ];
 
 export interface getItemByIdFunc {
-  (id: number): item | undefined;
+  (id: number | null): item | undefined;
 }
 
 function App() {
@@ -32,6 +33,25 @@ function App() {
   const [currentID, setCurrentID] = useState<number>(0);
   const [visibleList, setVisibleList] = useState<Array<item>>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const fetchResults = useRef(
+    throttle((search: string, currentID: number, items: item[]) => {
+      let searchLower: string = search.toLowerCase();
+      let newVisible: Array<item> = [];
+      items.forEach((item: item) => {
+        if (search) {
+          if (
+            item.name.toLowerCase().includes(searchLower) ||
+            item.content?.toLowerCase().includes(searchLower)
+          ) {
+            newVisible.push(item);
+          }
+        } else if (currentID === item.parent_id) {
+          newVisible.push(item);
+        }
+      });
+      setVisibleList(newVisible);
+    }, 1000)
+  );
 
   const submitItem = useCallback(
     (name, content) => {
@@ -53,23 +73,49 @@ function App() {
     [items]
   );
 
+  const renderBreadCrumbs = () => {
+    let list: JSX.Element[] = [];
+    let idTrack: number | null = currentID;
+    while (getItemById(idTrack)?.parent_id !== null) {
+      let clickId: number | null = idTrack;
+      list.unshift(
+        <Link
+          underline="hover"
+          color="inherit"
+          onClick={() => goToItem(clickId!)}
+          key={idTrack}
+        >
+          {getItemById(idTrack)!.name}
+        </Link>
+      );
+
+      idTrack = getItemById(idTrack)!.parent_id;
+    }
+    list.unshift(
+      <Link
+        underline="hover"
+        color="inherit"
+        onClick={() => goToItem(idTrack!)}
+        key={idTrack}
+      >
+        {getItemById(idTrack)!.name}
+      </Link>
+    );
+    return list;
+  };
+
+  const goToItem = (id: number) => {
+    setCurrentID(id);
+    setSearchTerm("");
+  };
+
   useEffect(() => {
-    let searchTermLower: string = searchTerm.toLowerCase();
-    let newVisible: Array<item> = [];
-    items.forEach((item: item) => {
-      if (searchTerm) {
-        if (item.name.toLowerCase().includes(searchTermLower)) {
-          newVisible.push(item);
-        }
-      } else if (currentID === item.parent_id) {
-        newVisible.push(item);
-      }
-    });
-    setVisibleList(newVisible);
+    fetchResults.current(searchTerm, currentID, items);
   }, [searchTerm, currentID, items]);
 
   return (
     <div className="App">
+      <h1>My Files</h1>
       <AppModal
         open={modal === ModalState.Folder}
         onClose={() => setModal(ModalState.None)}
@@ -89,40 +135,42 @@ function App() {
         fullWidth
         variant="standard"
         value={searchTerm}
-        onChange={(e) => {
-          if (e.target.value) {
-            setSearchTerm(e.target.value);
-          }
-        }}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
       <br />
       <br />
-      <Box className="leftBox">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setModal(ModalState.Folder)}
-        >
-          Create New Folder
-        </Button>
+      {!searchTerm && (
+        <>
+          <Breadcrumbs aria-label="breadcrumb">
+            {renderBreadCrumbs()}
+          </Breadcrumbs>
+          {getItemById(currentID)?.content ? null : (
+            <Box className="leftBox">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setModal(ModalState.Folder)}
+              >
+                Create New Folder
+              </Button>
+              <Button
+                variant="contained"
+                color="info"
+                onClick={() => setModal(ModalState.File)}
+              >
+                Create New File
+              </Button>
+            </Box>
+          )}
+        </>
+      )}
 
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => setModal(ModalState.File)}
-        >
-          Create New File
-        </Button>
-      </Box>
-
-      {/* Breadcrumbs */}
-      <br />
-      <br />
+      {searchTerm && <h2>Search Results</h2>}
       <div className="main-view">
         <MainView
           getItemById={getItemById}
           visibleList={visibleList}
-          openItem={(id) => setCurrentID(id)}
+          openItem={(id) => goToItem(id)}
           currentID={currentID}
         />
       </div>

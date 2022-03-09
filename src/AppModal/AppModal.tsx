@@ -25,7 +25,13 @@ const AppModal = ({ folder, open, onClose, onSubmit }: Props) => {
   const [contentVal, setContentVal] = useState<string>("");
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      className="main-dialogue"
+      fullWidth
+      maxWidth="sm"
+    >
       <DialogTitle>{folder ? "New Folder" : "New File"}</DialogTitle>
       <DialogContent>
         <TextField
@@ -37,25 +43,20 @@ const AppModal = ({ folder, open, onClose, onSubmit }: Props) => {
           fullWidth
           variant="standard"
           value={nameVal}
-          onChange={(e) => {
-            if (e.target.value) {
-              setNameVal(e.target.value);
-            }
-          }}
+          onChange={(e) => setNameVal(e.target.value)}
         />
+        <br />
+        <br />
         {!folder && (
-          <TextareaAutosize
+          <TextField
             id="item-content"
             aria-label="minimum height"
             minRows={4}
+            fullWidth
+            multiline
+            label="File Content..."
             value={contentVal}
-            placeholder="File Content..."
-            onChange={(e) => {
-              if (e.target.value) {
-                setContentVal(e.target.value);
-              }
-            }}
-            style={{ width: "100%" }}
+            onChange={(e) => setContentVal(e.target.value)}
           />
         )}
       </DialogContent>
