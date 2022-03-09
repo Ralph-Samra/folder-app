@@ -1,5 +1,12 @@
 .App {
   text-align: center;
+  padding: 4em;
+  max-width: 1000px;
+  margin: auto;
+  background-color: white;
+  box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.393);
+  height: 80vh;
+  margin-top: 5vh;
 }
 
 .App-logo {
@@ -35,4 +42,41 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.main-view {
+  padding: 4em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+}
+.main-view button {
+  display: inline-block;
+  height: 100px;
+  width: 100px;
+  position: relative;
+  /* border: 2px solid grey !important; */
+  margin-bottom: 50px;
+}
+.main-view button svg {
+  height: 80px;
+  width: 80px;
+}
+
+.main-view button label {
+  position: absolute;
+  top: 100px;
+  text-align: center;
+  width: 80px;
+  font-size: 14px;
+  font-weight: 700;
+  color: grey;
+}
+
+.leftBox {
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
+  display: flex;
 }
